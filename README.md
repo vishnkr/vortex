@@ -1,0 +1,1 @@
+Vortex is a collection of services that run on distributed nodes on top of [Maelstrom's workbench](https://github.com/maelstrom-work/maelstrom) (part of the [Gossip Glomers challenge](https://fly.io/dist-sys/)). 
