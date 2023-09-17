@@ -31,9 +31,9 @@ func main(){
 		return n.Reply(msg,body)
 	})
 	n.Handle("generate",handleUUIDGen(n))
-	n.Handle("n_broadcast",func (msg maelstrom.Message) error{ return nil })
+	n.Handle("replicated_broadcast",handleBroadcast(n,bs,true))
 	n.Handle("read",handleBroadcastRead(n,bs))
-	n.Handle("broadcast",handleBroadcast(n,bs))
+	n.Handle("broadcast",handleBroadcast(n,bs,false))
 	n.Handle("topology",handleBroadcastTopology(n,bs))
 	if err := n.Run(); err != nil {
 		log.Fatal(err)

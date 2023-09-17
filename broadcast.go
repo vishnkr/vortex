@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"log"
 
 	maelstrom "github.com/jepsen-io/maelstrom/demo/go"
 )
@@ -29,7 +28,7 @@ func handleBroadcastRead(node *maelstrom.Node,bs *broadcastStore) maelstrom.Hand
 	}
 } 
 
-func handleBroadcast(node *maelstrom.Node,bs *broadcastStore) maelstrom.HandlerFunc{
+func handleBroadcast(node *maelstrom.Node,bs *broadcastStore, isReplicated bool) maelstrom.HandlerFunc{
 
 	return func(msg maelstrom.Message) error{ 
 		var body map[string]any
@@ -39,13 +38,14 @@ func handleBroadcast(node *maelstrom.Node,bs *broadcastStore) maelstrom.HandlerF
 		}
 		
 		bs.seenMessages = append(bs.seenMessages, body["message"])
-		body["type"]="n_broadcast"
-		
-		for _,n:= range node.NodeIDs(){
-			if n!=node.ID(){
-				node.Send(n,body)
+		if(!isReplicated){
+			body["type"]="replicated_broadcast"
+			for _,n:= range node.NodeIDs(){
+				if n!=node.ID(){
+					node.Send(n,body)
+				}
 			}
-		}
+		} 
 		delete(body,"message") 
 		body["type"] = "broadcast_ok"
 		return node.Reply(msg,body)
@@ -59,7 +59,6 @@ func handleBroadcastTopology(node *maelstrom.Node,bs *broadcastStore) maelstrom.
 		if err:= json.Unmarshal(msg.Body, &body); err!=nil{
 			return err
 		}
-		log.Println(body,"we heare")
 		response["type"] = "topology_ok"
 		return node.Reply(msg,response)
 	}
